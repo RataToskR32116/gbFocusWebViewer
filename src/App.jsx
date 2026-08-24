@@ -1,26 +1,21 @@
 import { useState } from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { parseGbFocusCsv } from './parseGBFocusCsv'
 
 export default function App() {
-  const [text, setText] = useState(null)
-  const [fileName, setFileName] = useState(null)
-  const [parsed, setParsed] = useState(null)
-  
+  const [data, setData] = useState(null)
+
   async function handleFile(file) {
     if (!file) return
-    const csvText = await file.text()
-
-    setFileName(file.name)
-    setText(csvText)
-    
-    const result = parseGbFocusCsv(csvText)
-    setParsed(result)
+    setData(parseGbFocusCsv(await file.text()))
   }
-  
+
+  const attention = data?.series('attention') ?? []
+
   return (
     <div style={{ padding: 24, fontFamily: 'sans-serif' }}>
       <h1>GB Focus ビューア</h1>
-
+      
       <input
         type="file"
         accept=".csv"
@@ -28,20 +23,42 @@ export default function App() {
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); handleFile(e.dataTransfer.files[0]) }}
         />
-
-      {fileName && <p>読み込み: {fileName}（{text.length.toLocaleString()} 文字）</p>}
-      {parsed && (
-        <div>
-          <p>デバイス: {parsed.device}</p>
-          <p>使える指標: {parsed.available.join(', ')}</p>
-          <p>集中度: {parsed.series('attention').length} 点</p>
-        </div>
-      )}
-      <pre style={{ fontSize: 11, maxHeight: 300, overflow: 'auto', background: '#f5f5f5' }}>
-        {text.slice(0, 2000)}
-      </pre>
       
-    
+      {attention && (
+        <p>{attention.t}</p>
+      )}
+
+      {data && (
+        <>
+          <p>デバイス: {data.device} / 集中度 {attention.length} 点</p>
+          <div style={{ width: '100%', height: 320 }}>
+            <ResponsiveContainer>
+              <LineChart data={attention}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="t"
+                  type="number"
+                  domain={[0, 'dataMax']}
+                  tickFormatter={(t) => `${Math.round(t)}s`}
+                />
+                <YAxis domain={[0, 100]} />
+                <Tooltip
+                  labelFormatter={(t) => `${t.toFixed(1)} 秒`}
+                  formatter={(v) => [v.toFixed(1), '集中度']}
+                />
+                {/* dot={false} は必須。260点ぶんの丸を描くと重いし見づらい */}
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#2563eb"
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
     </div>
   )
 }

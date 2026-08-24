@@ -12,8 +12,20 @@ export function parseGbFocusCsv(text) {
   // "00:04:04.123" → 244.123（秒）
   const toSeconds = (hms) => {
     if (!hms) return NaN
-    const [h, m, s] = hms.split(':')
-    return Number(h) * 3600 + Number(m) * 60 + Number(s)
+    const parts = hms.split(':').map(Number)
+    if (parts.some((part) => !Number.isFinite(part))) return NaN
+
+    if (parts.length === 3) {
+      const [h, m, s] = parts
+      return h * 3600 + m * 60 + s
+    }
+
+    if (parts.length === 2) {
+      const [m, s] = parts
+      return m * 60 + s
+    }
+
+    return NaN
   }
 
   /** 指標名を渡すと [{ t: 秒, value: 値 }, ...] を返す */
