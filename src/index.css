@@ -8,6 +8,8 @@
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
+  --metric-controls-space: 15pt;
+  --chart-panel-bg: #fff;
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
@@ -93,6 +95,48 @@ h2 {
 }
 p {
   margin: 0;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 24px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.chart-tab {
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 12%, var(--bg));
+  cursor: pointer;
+  font: inherit;
+  margin-bottom: -1px;
+}
+
+.chart-tab[aria-selected='true'] {
+  border-bottom: 1px solid var(--chart-panel-bg);
+  color: var(--text-h);
+  background: var(--chart-panel-bg);
+  position: relative;
+  z-index: 1;
+}
+
+.chart-panel {
+  border: 1px solid var(--border);
+  border-top: 0;
+  background: var(--chart-panel-bg);
+  padding: 24px;
+  text-align: left;
+}
+
+.metric-controls {
+  border: 0;
+  padding: 0;
+  margin: var(--metric-controls-space) 0;
 }
 
 code,
