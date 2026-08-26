@@ -2,6 +2,16 @@ import { useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { parseGbFocusCsv } from './parseGBFocusCsv'
 
+function summarizeValues(series) {
+  const values = series.map(({ value }) => value)
+  if (values.length === 0) return { mean: 0, standardDeviation: 0 }
+
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length
+  const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length
+
+  return { mean, standardDeviation: Math.sqrt(variance) }
+}
+
 export default function App() {
   const [data, setData] = useState(null)
   const [activeTab, setActiveTab] = useState('state')
@@ -27,6 +37,8 @@ export default function App() {
   const delta = data?.series('delta') ?? []
   const theta = data?.series('theta') ?? []
   const gamma = data?.series('gamma') ?? []
+  const attentionSummary = summarizeValues(attention)
+  const meditationSummary = summarizeValues(meditation)
 
   function toggleSeries(name) {
     setVisibleSeries((current) => ({
@@ -74,7 +86,7 @@ export default function App() {
 
           {activeTab === 'frequency' ? (
             <section className="chart-panel" id="frequency-panel" role="tabpanel">
-              <p>デバイス: {data.device} / α波 {alpha.length} 点 / β波 {beta.length} 点 / δ波 {delta.length} 点 / θ波 {theta.length} 点 / γ波 {gamma.length} 点</p>
+              <p>デバイス: {data.device}</p>
               <fieldset className="metric-controls">
                 <legend>表示する指標</legend>
                 <label>
@@ -120,7 +132,7 @@ export default function App() {
               </fieldset>
               <div style={{ width: '100%', height: 320 }}>
                 <ResponsiveContainer>
-                  <LineChart data={alpha}>
+                  <LineChart data={alpha} margin={{ top: 20, left: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="t"
@@ -128,7 +140,10 @@ export default function App() {
                       domain={[0, 'dataMax']}
                       tickFormatter={(t) => `${Math.round(t)}s`}
                     />
-                    <YAxis domain={['auto', 'auto']} />
+                    <YAxis
+                      domain={['auto', 'auto']}
+                      tickFormatter={(value) => `${value}\nµV²`}
+                    />
                     <Tooltip
                       labelFormatter={(t) => `${t.toFixed(1)} 秒`}
                       formatter={(v, name) => [v.toFixed(3), {
@@ -200,7 +215,9 @@ export default function App() {
             </section>
           ) : (
             <section className="chart-panel" id="state-panel" role="tabpanel">
-              <p>デバイス: {data.device} / 集中度 {attention.length} 点 / リラックス度 {meditation.length} 点</p>
+              <p>
+                デバイス: {data.device} / 集中度: 平均 {attentionSummary.mean.toFixed(2)}、標準偏差 {attentionSummary.standardDeviation.toFixed(2)} / リラックス度: 平均 {meditationSummary.mean.toFixed(2)}、標準偏差 {meditationSummary.standardDeviation.toFixed(2)} 
+              </p>
               <fieldset className="metric-controls">
                 <legend>表示する指標</legend>
                 <label>
@@ -222,7 +239,7 @@ export default function App() {
               </fieldset>
               <div style={{ width: '100%', height: 320 }}>
                 <ResponsiveContainer>
-                  <LineChart data={attention}>
+                  <LineChart data={attention} margin={{ top: 20, left: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="t"
