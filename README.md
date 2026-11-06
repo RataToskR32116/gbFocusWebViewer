@@ -31,6 +31,9 @@ npm run dev
 2. アプリ画面のファイル選択欄から CSV を選びます。
 3. 「状態指数」と「周波数」のタブを切り替え、チェックボックスで表示する指標を選びます。
 
+![GB Focus Web Viewer - 状態指数表示中](./docs/img/img6.png)
+![GB Focus Web Viewer - 周波数バンド表示中](./docs/img/img7.png)
+
 CSV はブラウザー内で読み込まれます。OxyZen と FocusCalm では CSV に含まれる指標が異なります。FocusCalm では、落ち着き度・眠気・脈拍・血中酸素飽和度は利用できません。生波形（`eeg`）の表示には対応していません。
 
 ## 開発用コマンド
